@@ -2,9 +2,10 @@ from tkinter import *
 import pandas
 import random
 
-import pandas as pd
+global current_card
+global flip_timer
 
-global index
+
 
 BACKGROUND_COLOR = "#B1DDC6"
 FONT = 'Ariel'
@@ -13,14 +14,21 @@ data = pandas.read_csv('data/french_words.csv')
 to_learn = data.to_dict(orient="records")
 
 def new_word():
-    random_word = random.choice(to_learn)
+    global current_card, flip_timer
+    window.after_cancel(flip_timer)
+    current_card = random.choice(to_learn)
 
-    canvas.itemconfig(current_language, text='French')
-    canvas.itemconfig(current_word, text=random_word['French'])
+    canvas.itemconfig(current_language, text='French', fill='black')
+    canvas.itemconfig(current_word, text=current_card['French'], fill='black')
+    canvas.itemconfig(card_background, image=card_front_photo)
+
+    flip_timer = window.after(3000, func=card_flip)
 
 def card_flip():
+
     canvas.itemconfig(card_background, image=card_back_photo)
-    canvas.itemconfig(current_language, text='English')
+    canvas.itemconfig(current_language, text='English', fill='white')
+    canvas.itemconfig(current_word, text=current_card['English'], fill='white')
 
 
 window = Tk()
@@ -39,15 +47,16 @@ current_word = canvas.create_text(400, 263, text="", fill='black', font=(FONT, 6
 right_photo = PhotoImage(file="images/right.png")
 wrong_photo = PhotoImage(file="images/wrong.png")
 
-right_btn = Button(image=right_photo, highlightthickness=0, command=card_flip)
+right_btn = Button(image=right_photo, highlightthickness=0, command=new_word)
 wrong_btn = Button(image=wrong_photo, highlightthickness=0, command=new_word)
 
 right_btn.grid(column=1, row=1)
 wrong_btn.grid(column=0, row=1)
 
+flip_timer = window.after(3000, func=card_flip)
+
 new_word()
 
-window.after(4000, func=card_flip)
 
 window.mainloop()
 
